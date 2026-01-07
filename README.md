@@ -1,7 +1,7 @@
 # User Login Blocker
 
 **Version:** 1.2  
-**Author:** Fachu Dev  
+**Author:** fachu.dev  
 **License:** GPL v2 or later  
 
 A WordPress plugin that allows administrators to selectively block users from logging into the site. Blocked users will see a customizable message when they attempt to log in.
