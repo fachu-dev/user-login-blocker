@@ -1,11 +1,17 @@
 <?php
 /**
  * Plugin Name: User Login Blocker 
+ * Plugin URI: https://github.com/fachu-dev/user-login-blocker
  * Description: Block selected users from logging in, with customizable message.
  * Version: 1.2
+ * Requires at least: 5.0
+ * Requires PHP: 7.4
  * Author: fachu.dev
  * Author URI: https://fachu.dev
- * Website: https://fachu.dev 
+ * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: user-login-blocker
+ * Network: false
  */
 
 if (!defined('ABSPATH')) exit;
