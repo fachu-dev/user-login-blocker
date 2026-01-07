@@ -1,53 +1,82 @@
 # User Login Blocker
 
-A WordPress plugin to block user login attempts based on email, IP address, or username patterns.
+**Version:** 1.1  
+**Author:** Fachu Dev  
+**License:** GPL v2 or later  
 
-## Description
-
-User Login Blocker is a security plugin that allows administrators to prevent specific users or IP addresses from logging into their WordPress site. This plugin provides flexible blocking options and detailed logging of blocked attempts.
+A WordPress plugin that allows administrators to selectively block users from logging into the site. Blocked users will see a customizable message when they attempt to log in.
 
 ## Features
 
-- **Email Blocking**: Block login attempts by specific email addresses
-- **IP Address Blocking**: Block login attempts from specific IP addresses
-- **Username Pattern Blocking**: Block login attempts based on username patterns
-- **Detailed Logging**: Keep track of all blocked login attempts
-- **Easy Administration**: Simple admin interface to manage blocked users and view logs
-- **Security Enhancement**: Add an extra layer of security to your WordPress site
+- **Block specific users** by selecting them from a dropdown list in the admin panel
+- **Customizable block message** that appears when blocked users try to log in
+- **Easy management** with a clean admin interface in Settings > User Login Blocker
+- **User-friendly display** showing usernames, emails, and user IDs for easy identification
+- **Unblock functionality** to easily remove users from the blocked list
+- **Secure implementation** with WordPress nonces and proper capability checks
 
 ## Installation
 
-### Method 1: WordPress Admin Dashboard (Recommended)
-1. Download the plugin ZIP file from the [releases page](https://github.com/fachu-dev/user-login-blocker/releases)
-2. Log in to your WordPress admin dashboard
-3. Navigate to **Plugins > Add New**
-4. Click **Upload Plugin**
-5. Choose the downloaded ZIP file and click **Install Now**
-6. Click **Activate Plugin** after installation completes
-7. Go to **Settings > User Login Blocker** to configure the plugin
+### Method 1: Upload via WordPress Admin (Recommended)
 
-### Method 2: Manual Upload via FTP
-1. Download and extract the plugin ZIP file
-2. Upload the `user-login-blocker` folder to the `/wp-content/plugins/` directory via FTP
+1. Download the latest release ZIP file from this repository
+2. In your WordPress admin, go to **Plugins > Add New**
+3. Click **Upload Plugin**
+4. Choose the downloaded ZIP file and click **Install Now**
+5. Click **Activate Plugin**
+
+### Method 2: Manual FTP Upload
+
+1. Download and extract the plugin files
+2. Upload the `user-login-blocker` folder to your `/wp-content/plugins/` directory
 3. Activate the plugin through the **Plugins** menu in WordPress
-4. Go to **Settings > User Login Blocker** to configure the plugin
+
+### Method 3: Git Clone (Development)
+
+```bash
+cd /path/to/wp-content/plugins/
+git clone https://github.com/fachu-dev/user-login-blocker.git
+```
+
+Then activate through the WordPress admin.
 
 ## Usage
 
-### Adding Blocked Items
+1. After activation, go to **Settings > User Login Blocker** in your WordPress admin
+2. Select users you want to block from the dropdown list (hold Cmd/Ctrl to select multiple)
+3. Customize the message that blocked users will see (optional)
+4. Click **Save Changes**
+5. To unblock users, use the **Unblock** button next to each blocked user in the list
 
-1. Navigate to **Settings > User Login Blocker**
-2. Choose the type of block:
-   - **Email**: Enter the email address to block
-   - **IP Address**: Enter the IP address to block
-   - **Username**: Enter the username pattern to block
-3. Click "Add Block"
+Blocked users will see your custom message when they try to log in, and the login will be prevented.
 
-### Viewing Blocked Attempts
+## Changelog
 
-1. Go to the **Blocked Attempts Log** tab
-2. View all blocked login attempts with timestamps and details
-3. Use the "Clear Log" button to reset the log if needed
+### Version 1.1
+- Added unblock functionality with individual unblock buttons for each blocked user
+- Improved admin interface with better visual layout for blocked users list
+- Added confirmation dialogs for unblock actions
+- Enhanced security with proper nonce verification for unblock operations
+- Better handling of invalid user IDs in blocked list
+
+### Version 1.0
+- Initial release
+- Basic user blocking functionality
+- Customizable block messages
+- Clean admin interface
+
+## Requirements
+
+- WordPress 5.0 or higher
+- PHP 7.4 or higher
+
+## Support
+
+If you encounter any issues or have questions about this plugin, please open an issue on this repository.
+
+## License
+
+This plugin is licensed under the GPL v2 or later.
 
 ## Screenshots
 

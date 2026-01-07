@@ -2,7 +2,7 @@
 /**
  * Plugin Name: User Login Blocker 
  * Description: Block selected users from logging in, with customizable message.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: fachu.dev
  * Website: https://fachu.dev 
  */
@@ -105,6 +105,18 @@ class ULB_User_Login_Blocker {
       wp_die('You do not have permission to access this page.');
     }
 
+    // Handle unblock action
+    if (isset($_POST['unblock_user']) && isset($_POST['user_id'])) {
+      check_admin_referer('ulb_unblock_user', 'ulb_unblock_nonce');
+      $user_id = intval($_POST['user_id']);
+      $blocked = get_option(self::OPT_BLOCKED_USERS, []);
+      if (is_array($blocked)) {
+        $blocked = array_diff($blocked, [$user_id]);
+        update_option(self::OPT_BLOCKED_USERS, array_values($blocked));
+        echo '<div class="notice notice-success is-dismissible"><p>User unblocked successfully.</p></div>';
+      }
+    }
+
     $blocked = get_option(self::OPT_BLOCKED_USERS, []);
     if (!is_array($blocked)) $blocked = [];
     $blocked = array_map('intval', $blocked);
@@ -171,21 +183,35 @@ class ULB_User_Login_Blocker {
 
       <hr />
 
-      <h2>Currently blocked</h2>
+      <h2>Currently blocked users</h2>
       <?php
         if (empty($blocked)) {
           echo '<p><em>No blocked users.</em></p>';
         } else {
-          echo '<ul>';
+          echo '<div style="background: #f8f8f8; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">';
           foreach ($blocked as $id) {
             $u = get_user_by('id', $id);
             if ($u) {
-              echo '<li>' . esc_html(self::label_user($u)) . '</li>';
+              echo '<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">';
+              echo '<span>' . esc_html(self::label_user($u)) . '</span>';
+              echo '<form method="post" style="margin: 0; display: inline-block;">';
+              wp_nonce_field('ulb_unblock_user', 'ulb_unblock_nonce');
+              echo '<input type="hidden" name="user_id" value="' . intval($id) . '" />';
+              echo '<input type="submit" name="unblock_user" value="Unblock" class="button button-secondary button-small" onclick="return confirm(\'Are you sure you want to unblock this user?\');" />';
+              echo '</form>';
+              echo '</div>';
             } else {
-              echo '<li>' . esc_html('User ID: ' . $id . ' (not found)') . '</li>';
+              echo '<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">';
+              echo '<span style="color: #999;">' . esc_html('User ID: ' . $id . ' (not found)') . '</span>';
+              echo '<form method="post" style="margin: 0; display: inline-block;">';
+              wp_nonce_field('ulb_unblock_user', 'ulb_unblock_nonce');
+              echo '<input type="hidden" name="user_id" value="' . intval($id) . '" />';
+              echo '<input type="submit" name="unblock_user" value="Remove" class="button button-secondary button-small" onclick="return confirm(\'Remove this invalid user ID from blocked list?\');" />';
+              echo '</form>';
+              echo '</div>';
             }
           }
-          echo '</ul>';
+          echo '</div>';
         }
       ?>
     </div>
