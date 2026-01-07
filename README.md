@@ -17,9 +17,20 @@ User Login Blocker is a security plugin that allows administrators to prevent sp
 
 ## Installation
 
-1. Upload the `user-login-blocker` folder to the `/wp-content/plugins/` directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Go to 'Settings' > 'User Login Blocker' to configure the plugin
+### Method 1: WordPress Admin Dashboard (Recommended)
+1. Download the plugin ZIP file from the [releases page](https://github.com/fachu-dev/user-login-blocker/releases)
+2. Log in to your WordPress admin dashboard
+3. Navigate to **Plugins > Add New**
+4. Click **Upload Plugin**
+5. Choose the downloaded ZIP file and click **Install Now**
+6. Click **Activate Plugin** after installation completes
+7. Go to **Settings > User Login Blocker** to configure the plugin
+
+### Method 2: Manual Upload via FTP
+1. Download and extract the plugin ZIP file
+2. Upload the `user-login-blocker` folder to the `/wp-content/plugins/` directory via FTP
+3. Activate the plugin through the **Plugins** menu in WordPress
+4. Go to **Settings > User Login Blocker** to configure the plugin
 
 ## Usage
 
