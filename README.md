@@ -1,6 +1,6 @@
 # User Login Blocker
 
-**Version:** 1.1  
+**Version:** 1.2  
 **Author:** Fachu Dev  
 **License:** GPL v2 or later  
 
@@ -9,11 +9,13 @@ A WordPress plugin that allows administrators to selectively block users from lo
 ## Features
 
 - **Block specific users** by selecting them from a dropdown list in the admin panel
+- **Block users by roles** including custom roles created by themes and plugins
 - **Customizable block message** that appears when blocked users try to log in
 - **Easy management** with a clean admin interface in Settings > User Login Blocker
 - **User-friendly display** showing usernames, emails, and user IDs for easy identification
-- **Unblock functionality** to easily remove users from the blocked list
+- **Unblock functionality** to easily remove users and roles from the blocked list
 - **Secure implementation** with WordPress nonces and proper capability checks
+- **Support for custom roles** automatically detects all available roles on the site
 
 ## Installation
 
@@ -42,15 +44,33 @@ Then activate through the WordPress admin.
 
 ## Usage
 
+### Blocking Individual Users
 1. After activation, go to **Settings > User Login Blocker** in your WordPress admin
 2. Select users you want to block from the dropdown list (hold Cmd/Ctrl to select multiple)
-3. Customize the message that blocked users will see (optional)
-4. Click **Save Changes**
-5. To unblock users, use the **Unblock** button next to each blocked user in the list
+3. To unblock users, use the **Unblock** button next to each blocked user in the list
+
+### Blocking by User Roles
+1. In the same settings page, scroll to the **Blocked roles** section
+2. Check the roles you want to block (affects all users with those roles)
+3. Custom roles created by themes/plugins are automatically detected and available
+4. To unblock roles, use the **Unblock** button next to each blocked role in the list
+
+### Custom Message
+1. Customize the message that blocked users will see (optional)
+2. Click **Save Changes**
 
 Blocked users will see your custom message when they try to log in, and the login will be prevented.
 
 ## Changelog
+
+### Version 1.2
+- Added role-based blocking functionality
+- Support for custom roles created by themes and plugins
+- Automatic detection of all available roles on the site
+- New admin interface section for managing blocked roles
+- Individual unblock buttons for blocked roles
+- Enhanced authentication logic to check both user IDs and roles
+- Improved admin interface with better organization
 
 ### Version 1.1
 - Added unblock functionality with individual unblock buttons for each blocked user
