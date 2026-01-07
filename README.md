@@ -9,13 +9,14 @@ A WordPress plugin that allows administrators to selectively block users from lo
 ## Features
 
 - **Block specific users** by selecting them from a dropdown list in the admin panel
-- **Block users by roles** including custom roles created by themes and plugins
+- **User role filtering** to easily find users when you have many users on your site
+- **User search functionality** to quickly locate users by name, email, or username
 - **Customizable block message** that appears when blocked users try to log in
 - **Easy management** with a clean admin interface in Settings > User Login Blocker
 - **User-friendly display** showing usernames, emails, and user IDs for easy identification
-- **Unblock functionality** to easily remove users and roles from the blocked list
+- **Unblock functionality** to easily remove users from the blocked list
 - **Secure implementation** with WordPress nonces and proper capability checks
-- **Support for custom roles** automatically detects all available roles on the site
+- **Support for all user roles** including custom roles created by themes and plugins
 
 ## Installation
 
@@ -44,33 +45,34 @@ Then activate through the WordPress admin.
 
 ## Usage
 
-### Blocking Individual Users
 1. After activation, go to **Settings > User Login Blocker** in your WordPress admin
-2. Select users you want to block from the dropdown list (hold Cmd/Ctrl to select multiple)
-3. To unblock users, use the **Unblock** button next to each blocked user in the list
+2. **Filter users** (optional): Use the role dropdown and/or search field to find specific users
+3. **Select users to block**: Choose users from the filtered dropdown list (hold Cmd/Ctrl to select multiple)
+4. **Customize message** (optional): Set the message that blocked users will see
+5. **Block users**: Click the "Block Selected Users" button
+6. **Unblock users**: Use the "Unblock" button next to each blocked user in the list
 
-### Blocking by User Roles
-1. In the same settings page, scroll to the **Blocked roles** section
-2. Check the roles you want to block (affects all users with those roles)
-3. Custom roles created by themes/plugins are automatically detected and available
-4. To unblock roles, use the **Unblock** button next to each blocked role in the list
+### Finding Users Easily
+When you have many users on your site, use the filtering options:
+- **Role Filter**: Select a role from the dropdown to show only users with that role
+- **Search**: Enter text to search by name, email, or username
+- **Combined Filters**: Use both filters together for more precise results
+- **Clear Filters**: Click "Clear Filters" to reset and show all users again
 
-### Custom Message
-1. Customize the message that blocked users will see (optional)
-2. Click **Save Changes**
+Both filters work with all roles including custom roles created by themes and plugins.
 
 Blocked users will see your custom message when they try to log in, and the login will be prevented.
 
 ## Changelog
 
 ### Version 1.2
-- Added role-based blocking functionality
-- Support for custom roles created by themes and plugins
-- Automatic detection of all available roles on the site
-- New admin interface section for managing blocked roles
-- Individual unblock buttons for blocked roles
-- Enhanced authentication logic to check both user IDs and roles
-- Improved admin interface with better organization
+- Added user role filtering functionality for easier user selection
+- Added user search functionality to find users by name, email, or username
+- Combined filtering options that work together for precise user location
+- Improved user interface with organized filter controls and clear button
+- Enhanced user experience when searching for specific users on large sites
+- Support for all user roles including custom roles created by themes and plugins
+- Better organization of admin interface with comprehensive filtering capabilities
 
 ### Version 1.1
 - Added unblock functionality with individual unblock buttons for each blocked user

@@ -2,8 +2,9 @@
 /**
  * Plugin Name: User Login Blocker 
  * Description: Block selected users from logging in, with customizable message.
- * Version: 1.2.0
+ * Version: 1.2
  * Author: fachu.dev
+ * Author URI: https://fachu.dev
  * Website: https://fachu.dev 
  */
 
@@ -11,7 +12,6 @@ if (!defined('ABSPATH')) exit;
 
 class ULB_User_Login_Blocker {
   const OPT_BLOCKED_USERS = 'ulb_blocked_user_ids';
-  const OPT_BLOCKED_ROLES = 'ulb_blocked_roles';
   const OPT_MESSAGE       = 'ulb_block_message';
 
   public static function init() {
@@ -25,7 +25,6 @@ class ULB_User_Login_Blocker {
     if (is_wp_error($user)) return $user;
     if (!$user || !is_a($user, 'WP_User')) return $user;
 
-    // Check blocked users by ID
     $blocked = get_option(self::OPT_BLOCKED_USERS, []);
     if (!is_array($blocked)) $blocked = [];
 
@@ -37,23 +36,6 @@ class ULB_User_Login_Blocker {
       if ($msg === '') $msg = 'Incorrect user. Please contact administration.';
 
       return new WP_Error('ulb_user_blocked', $msg);
-    }
-
-    // Check blocked users by role
-    $blocked_roles = get_option(self::OPT_BLOCKED_ROLES, []);
-    if (!is_array($blocked_roles)) $blocked_roles = [];
-
-    if (!empty($blocked_roles) && !empty($user->roles)) {
-      $user_roles = (array) $user->roles;
-      $has_blocked_role = array_intersect($user_roles, $blocked_roles);
-      
-      if (!empty($has_blocked_role)) {
-        $msg = get_option(self::OPT_MESSAGE, 'Incorrect user. Please contact administration.');
-        $msg = is_string($msg) ? trim($msg) : 'Incorrect user. Please contact administration.';
-        if ($msg === '') $msg = 'Incorrect user. Please contact administration.';
-
-        return new WP_Error('ulb_role_blocked', $msg);
-      }
     }
 
     return $user;
@@ -76,12 +58,6 @@ class ULB_User_Login_Blocker {
       'default'           => [],
     ]);
 
-    register_setting('ulb_settings_group', self::OPT_BLOCKED_ROLES, [
-      'type'              => 'array',
-      'sanitize_callback' => [__CLASS__, 'sanitize_roles'],
-      'default'           => [],
-    ]);
-
     register_setting('ulb_settings_group', self::OPT_MESSAGE, [
       'type'              => 'string',
       'sanitize_callback' => [__CLASS__, 'sanitize_message'],
@@ -96,13 +72,6 @@ class ULB_User_Login_Blocker {
     return $value;
   }
 
-  public static function sanitize_roles($value) {
-    if (!is_array($value)) return [];
-    $value = array_map('sanitize_text_field', $value);
-    $value = array_values(array_unique(array_filter($value)));
-    return $value;
-  }
-
   public static function sanitize_message($value) {
     $value = is_string($value) ? wp_strip_all_tags($value) : '';
     $value = trim($value);
@@ -112,13 +81,23 @@ class ULB_User_Login_Blocker {
     return $value;
   }
 
-  private static function get_users_for_dropdown() {
-    return get_users([
+  private static function get_users_for_dropdown($role_filter = '', $search_term = '') {
+    $args = [
       'orderby' => 'display_name',
       'order'   => 'ASC',
       'fields'  => ['ID', 'display_name', 'user_login', 'user_email', 'roles'],
       'number'  => 2000,
-    ]);
+    ];
+
+    if (!empty($role_filter)) {
+      $args['role'] = $role_filter;
+    }
+
+    if (!empty($search_term)) {
+      $args['search'] = '*' . $search_term . '*';
+    }
+
+    return get_users($args);
   }
 
   private static function get_all_roles() {
@@ -157,28 +136,17 @@ class ULB_User_Login_Blocker {
       }
     }
 
-    // Handle role unblock action
-    if (isset($_POST['unblock_role']) && isset($_POST['role_name'])) {
-      check_admin_referer('ulb_unblock_role', 'ulb_unblock_role_nonce');
-      $role_name = sanitize_text_field($_POST['role_name']);
-      $blocked_roles = get_option(self::OPT_BLOCKED_ROLES, []);
-      if (is_array($blocked_roles)) {
-        $blocked_roles = array_diff($blocked_roles, [$role_name]);
-        update_option(self::OPT_BLOCKED_ROLES, array_values($blocked_roles));
-        echo '<div class="notice notice-success is-dismissible"><p>Role unblocked successfully.</p></div>';
-      }
-    }
-
     $blocked = get_option(self::OPT_BLOCKED_USERS, []);
     if (!is_array($blocked)) $blocked = [];
     $blocked = array_map('intval', $blocked);
 
-    $blocked_roles = get_option(self::OPT_BLOCKED_ROLES, []);
-    if (!is_array($blocked_roles)) $blocked_roles = [];
-
     $msg = get_option(self::OPT_MESSAGE, 'Incorrect user. Please contact administration.');
 
-    $users = self::get_users_for_dropdown();
+    // Get filter parameters
+    $role_filter = isset($_GET['role_filter']) ? sanitize_text_field($_GET['role_filter']) : '';
+    $search_term = isset($_GET['search_users']) ? sanitize_text_field($_GET['search_users']) : '';
+    
+    $users = self::get_users_for_dropdown($role_filter, $search_term);
     $all_roles = self::get_all_roles();
     ?>
     <div class="wrap">
@@ -186,7 +154,48 @@ class ULB_User_Login_Blocker {
 
       <p>Block selected users from logging in. Works for any role (including administrators).</p>
 
-      <form method="post" action="options.php">
+      <div style="background: #f0f0f1; padding: 15px; margin: 20px 0; border-left: 4px solid #0073aa;">
+        <h3 style="margin-top: 0;">Filter Users</h3>
+        <form method="get" style="margin: 0;">
+          <input type="hidden" name="page" value="user-login-blocker" />
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div>
+              <label for="role_filter" style="font-weight: bold; margin-right: 5px;">By Role:</label>
+              <select name="role_filter" id="role_filter" onchange="this.form.submit()">
+                <option value="">All Users</option>
+                <?php foreach ($all_roles as $role_key => $role_name): ?>
+                  <option value="<?php echo esc_attr($role_key); ?>" <?php selected($role_filter, $role_key); ?>>
+                    <?php echo esc_html($role_name); ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div>
+              <label for="search_users" style="font-weight: bold; margin-right: 5px;">Search:</label>
+              <input 
+                type="text" 
+                name="search_users" 
+                id="search_users"
+                value="<?php echo esc_attr($search_term); ?>" 
+                placeholder="Name, email or username..."
+                style="width: 200px;"
+              />
+              <input type="submit" value="Search" class="button" style="margin-left: 5px;" />
+            </div>
+            <?php if ($role_filter || $search_term): ?>
+              <div>
+                <a href="?page=user-login-blocker" class="button button-secondary">Clear Filters</a>
+              </div>
+            <?php endif; ?>
+          </div>
+          <noscript><input type="submit" value="Apply Filter" class="button" /></noscript>
+        </form>
+        <p style="margin-bottom: 0; font-style: italic; color: #666;">
+          Use these filters to easily find users when you have many users on your site.
+        </p>
+      </div>
+
+      <form method="post" action="options.php"><?php echo ($role_filter || $search_term) ? '<!-- Filtered by: ' . esc_html($role_filter ?: 'role') . ($search_term ? ', search: ' . esc_html($search_term) : '') . ' -->' : ''; ?>
         <?php settings_fields('ulb_settings_group'); ?>
 
         <table class="form-table" role="presentation">
@@ -212,38 +221,16 @@ class ULB_User_Login_Blocker {
 
               <p class="description">
                 Tip: on Mac/Windows hold <strong>Cmd/Ctrl</strong> to select multiple users.
-              </p>
-            </td>
-          </tr>
-
-          <tr>
-            <th scope="row"><label>Blocked roles</label></th>
-            <td>
-              <fieldset>
-                <legend class="screen-reader-text">Blocked roles</legend>
-                <?php if (!empty($all_roles)): ?>
-                  <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: #f9f9f9;">
-                    <?php foreach ($all_roles as $role_key => $role_name): ?>
-                      <?php $checked = in_array($role_key, $blocked_roles) ? 'checked' : ''; ?>
-                      <label style="display: block; margin: 5px 0;">
-                        <input 
-                          type="checkbox" 
-                          name="<?php echo esc_attr(self::OPT_BLOCKED_ROLES); ?>[]" 
-                          value="<?php echo esc_attr($role_key); ?>"
-                          <?php echo $checked; ?>
-                        />
-                        <strong><?php echo esc_html($role_name); ?></strong> 
-                        <code style="font-size: 11px; color: #666;">(<?php echo esc_html($role_key); ?>)</code>
-                      </label>
-                    <?php endforeach; ?>
-                  </div>
-                  <p class="description">
-                    Select roles to block from logging in. This affects <strong>all users</strong> with these roles.
-                  </p>
-                <?php else: ?>
-                  <p><em>No roles found.</em></p>
+                <?php if ($role_filter || $search_term): ?>
+                <br>Currently showing: 
+                <?php if ($role_filter): ?>
+                  users with role <strong><?php echo esc_html($all_roles[$role_filter] ?? $role_filter); ?></strong>
                 <?php endif; ?>
-              </fieldset>
+                <?php if ($search_term): ?>
+                  <?php echo $role_filter ? ' and' : ''; ?> matching "<strong><?php echo esc_html($search_term); ?></strong>"
+                <?php endif; ?>
+                <?php endif; ?>
+              </p>
             </td>
           </tr>
 
@@ -265,7 +252,7 @@ class ULB_User_Login_Blocker {
           </tr>
         </table>
 
-        <?php submit_button('Save changes'); ?>
+        <?php submit_button('Block Selected Users', 'primary', 'submit', true, ['id' => 'ulb-submit-btn']); ?>
       </form>
 
       <hr />
@@ -297,27 +284,6 @@ class ULB_User_Login_Blocker {
               echo '</form>';
               echo '</div>';
             }
-          }
-          echo '</div>';
-        }
-      ?>
-
-      <h2>Currently blocked roles</h2>
-      <?php
-        if (empty($blocked_roles)) {
-          echo '<p><em>No blocked roles.</em></p>';
-        } else {
-          echo '<div style="background: #f8f8f8; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">';
-          foreach ($blocked_roles as $role_key) {
-            $role_name = isset($all_roles[$role_key]) ? $all_roles[$role_key] : $role_key;
-            echo '<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">';
-            echo '<span><strong>' . esc_html($role_name) . '</strong> <code style="font-size: 11px; color: #666;">(' . esc_html($role_key) . ')</code></span>';
-            echo '<form method="post" style="margin: 0; display: inline-block;">';
-            wp_nonce_field('ulb_unblock_role', 'ulb_unblock_role_nonce');
-            echo '<input type="hidden" name="role_name" value="' . esc_attr($role_key) . '" />';
-            echo '<input type="submit" name="unblock_role" value="Unblock" class="button button-secondary button-small" onclick="return confirm(\'Are you sure you want to unblock this role?\');" />';
-            echo '</form>';
-            echo '</div>';
           }
           echo '</div>';
         }
